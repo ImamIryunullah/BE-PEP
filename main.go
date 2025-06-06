@@ -12,8 +12,7 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 	config.ConnectDatabase()
-	config.DB.AutoMigrate(&models.Peserta{}, &models.Berita{})
+	config.DB.AutoMigrate(&models.DaftarUser{}, &models.Berita{}, &models.ParticipantRegistration{})
 	routes.SetupRoutes(router)
 	router.Run("0.0.0.0:8080")
-
 }

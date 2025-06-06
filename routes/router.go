@@ -6,7 +6,6 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine) {
-
 	router.POST("/register", controllers.RegisterPeserta)
 	router.POST("/login", controllers.Login)
 	router.GET("/ping", func(c *gin.Context) {
@@ -20,4 +19,6 @@ func SetupRoutes(router *gin.Engine) {
 		router.GET("/berita", controllers.GetAllBerita)
 		beritaGroup.DELETE("/:id", controllers.DeleteBerita)
 	}
+
+	router.POST("/daftar", controllers.SubmitParticipantRegistration)
 }

@@ -27,7 +27,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var peserta models.Peserta
+	var peserta models.DaftarUser
 
 	if err := config.DB.Where("email = ?", input.Email).First(&peserta).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Email atau password salah"})
