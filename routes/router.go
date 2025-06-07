@@ -17,7 +17,7 @@ func SetupRoutes(router *gin.Engine) {
 		beritaGroup.POST("/", controllers.CreateBerita)
 		beritaGroup.PUT("/:id", controllers.UpdateBerita)
 		router.GET("/berita", controllers.GetAllBerita)
-		beritaGroup.DELETE("/:id", controllers.DeleteBerita)
+		// beritaGroup.DELETE("/:id", controllers.DeleteBerita)
 	}
 
 	router.POST("/daftar", controllers.SubmitParticipantRegistration)
