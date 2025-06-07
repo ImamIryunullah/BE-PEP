@@ -21,4 +21,6 @@ func SetupRoutes(router *gin.Engine) {
 	}
 
 	router.POST("/daftar", controllers.SubmitParticipantRegistration)
+	router.GET("/daftar", controllers.GetAllPeserta)
+
 }
