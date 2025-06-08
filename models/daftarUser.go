@@ -12,19 +12,18 @@ type DaftarUser struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	Email    string `gorm:"uniqueIndex;type:varchar(100);not null" json:"email"`
-	Password string `gorm:"type:varchar(255);not null" json:"-"`
-	Aset     string `gorm:"type:varchar(100);not null" json:"aset"`
-	Provinsi string `gorm:"type:varchar(100);not null" json:"provinsi"`
-	Foto     string `gorm:"type:varchar(255)" json:"foto"`
-	FotoPath string `gorm:"type:varchar(500)" json:"foto_path"`
-
-	// Status untuk tracking
+	Email     string     `gorm:"uniqueIndex;type:varchar(100);not null" json:"email"`
+	Password  string     `gorm:"type:varchar(255);not null" json:"-"`
+	Aset      string     `gorm:"type:varchar(100);not null" json:"aset"`
+	Provinsi  string     `gorm:"type:varchar(100);not null" json:"provinsi"`
+	Foto      string     `gorm:"type:varchar(255)" json:"foto"`
+	FotoPath  string     `gorm:"type:varchar(500)" json:"foto_path"`
 	IsActive  bool       `gorm:"default:true" json:"is_active"`
 	LastLogin *time.Time `json:"last_login,omitempty"`
+
+	Registrations []ParticipantRegistration `gorm:"foreignKey:UserID" json:"registrations,omitempty"`
 }
 
-// GetPublicData mengembalikan data publik user (tanpa password)
 func (u *DaftarUser) GetPublicData() map[string]interface{} {
 	return map[string]interface{}{
 		"id":         u.ID,

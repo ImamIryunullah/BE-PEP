@@ -8,6 +8,7 @@ import (
 
 type ParticipantRegistration struct {
 	ID             uint      `json:"id" gorm:"primaryKey"`
+	UserID         uint      `json:"user_id" gorm:"not null;index"`
 	NamaLengkap    string    `json:"nama_lengkap" form:"nama_lengkap" binding:"required"`
 	Email          string    `json:"email" form:"email" binding:"required,email"`
 	NoTelepon      string    `json:"no_telepon" form:"no_telepon" binding:"required"`
@@ -31,7 +32,21 @@ type ParticipantRegistration struct {
 
 	Status string `json:"status" gorm:"default:pending"`
 
+	User DaftarUser `gorm:"foreignKey:UserID" json:"user,omitempty"`
+
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
+}
+
+func (u *DaftarUser) GetUserRegistrations(db *gorm.DB) ([]ParticipantRegistration, error) {
+	var registrations []ParticipantRegistration
+	err := db.Where("user_id = ?", u.ID).Find(&registrations).Error
+	return registrations, err
+}
+
+func (u *DaftarUser) GetPublicDataWithRegistrations() map[string]interface{} {
+	data := u.GetPublicData()
+	data["registrations"] = u.Registrations
+	return data
 }

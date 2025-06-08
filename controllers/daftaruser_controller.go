@@ -232,7 +232,6 @@ func isDuplicateError(err error) bool {
 		strings.Contains(errorStr, "constraint")
 }
 
-// GetPesertaByEmail mengambil data peserta berdasarkan email (helper function)
 func GetPesertaByEmail(email string) (*models.DaftarUser, error) {
 	var peserta models.DaftarUser
 	err := config.DB.Where("email = ?", strings.ToLower(strings.TrimSpace(email))).First(&peserta).Error
