@@ -27,5 +27,4 @@ func SetupRoutes(router *gin.Engine) {
 	router.PUT("/daftar/:id", controllers.EditParticipantRegistration)
 	router.PUT("/daftar/:id/status", controllers.UpdateParticipantStatus)
 	router.GET("/daftar/:id", controllers.GetParticipantById)
-
 }
