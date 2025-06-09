@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type CreateKnockoutMatchRequest struct {
 	Kategori    string `json:"kategori" binding:"required,max=100"`
 	SubKategori string `json:"sub_kategori" binding:"required,max=100"`
@@ -95,7 +94,6 @@ func GetAllKnockoutMatches(c *gin.Context) {
 
 	query := config.DB.Model(&models.KnockoutMatch{})
 
-	
 	if kategori != "" {
 		query = query.Where("kategori ILIKE ?", "%"+kategori+"%")
 	}
@@ -212,7 +210,6 @@ func UpdateKnockoutMatch(c *gin.Context) {
 		return
 	}
 
-	
 	if req.Kategori != "" {
 		match.Kategori = strings.TrimSpace(req.Kategori)
 	}
@@ -288,7 +285,6 @@ func DeleteKnockoutMatch(c *gin.Context) {
 	})
 }
 
-
 func GetKnockoutStats(c *gin.Context) {
 	var stats struct {
 		Total      int64            `json:"total"`
@@ -296,10 +292,8 @@ func GetKnockoutStats(c *gin.Context) {
 		ByTahap    map[string]int64 `json:"by_tahap"`
 	}
 
-	
 	config.DB.Model(&models.KnockoutMatch{}).Count(&stats.Total)
 
-	
 	var kategoriResults []struct {
 		Kategori string
 		Count    int64
@@ -314,7 +308,6 @@ func GetKnockoutStats(c *gin.Context) {
 		stats.ByKategori[result.Kategori] = result.Count
 	}
 
-	
 	var tahapResults []struct {
 		Tahap string
 		Count int64
@@ -335,7 +328,6 @@ func GetKnockoutStats(c *gin.Context) {
 		"data":    stats,
 	})
 }
-
 
 func GetKnockoutByKategori(c *gin.Context) {
 	kategori := c.Param("kategori")
@@ -363,7 +355,6 @@ func GetKnockoutByKategori(c *gin.Context) {
 	})
 }
 
-
 func GetKnockoutByTahap(c *gin.Context) {
 	tahap := c.Param("tahap")
 	if tahap == "" {
@@ -390,7 +381,6 @@ func GetKnockoutByTahap(c *gin.Context) {
 	})
 }
 
-
 func GetKnockoutStanding(c *gin.Context) {
 	kategori := c.Query("kategori")
 	subKategori := c.Query("sub_kategori")
@@ -413,7 +403,6 @@ func GetKnockoutStanding(c *gin.Context) {
 		return
 	}
 
-	
 	standingByTahap := make(map[string][]models.KnockoutMatch)
 	for _, match := range matches {
 		standingByTahap[match.Tahap] = append(standingByTahap[match.Tahap], match)

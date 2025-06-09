@@ -197,7 +197,17 @@ func GetAllBerita(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": beritas})
 }
+func GetBeritaByID(c *gin.Context) {
+	id := c.Param("id")
+	var berita models.Berita
 
+	if err := config.DB.First(&berita, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Berita tidak ditemukan"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": berita})
+}
 func DeleteBerita(c *gin.Context) {
 
 	id := c.Param("id")

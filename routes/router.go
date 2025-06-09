@@ -14,15 +14,14 @@ func SetupRoutes(router *gin.Engine) {
 
 	router.GET("/registrations/user/:user_id", controllers.GetRegistrationsByUserID)
 	router.GET("/users/:user_id/registrations", controllers.GetUserWithRegistrations)
-
 	beritaGroup := router.Group("/berita")
 	{
-		beritaGroup.POST("/", controllers.CreateBerita)
-		beritaGroup.PUT("/:id", controllers.UpdateBerita)
+		beritaGroup.POST("/", controllers.CreateBerita)	
 		beritaGroup.GET("/", controllers.GetAllBerita)
+		beritaGroup.GET("/:id", controllers.GetBeritaByID)
+		beritaGroup.PUT("/:id", controllers.UpdateBerita)
 		beritaGroup.DELETE("/:id", controllers.DeleteBerita)
 	}
-
 	router.POST("/daftar", controllers.SubmitParticipantRegistration)
 	router.GET("/daftar", controllers.GetAllPeserta)
 	router.PUT("/daftar/:id", controllers.EditParticipantRegistration)
@@ -31,15 +30,27 @@ func SetupRoutes(router *gin.Engine) {
 
 	funrunGroup := router.Group("/funrun")
 	{
+		funrunGroup.POST("/peserta", controllers.CreatePesertaFunrun)
+		funrunGroup.GET("/peserta", controllers.GetAllPesertaFunrun)
+		funrunGroup.GET("/peserta/:id", controllers.GetPesertaByID)
+		funrunGroup.PUT("/peserta/:id", controllers.UpdatePesertaFunrun)
+		funrunGroup.PUT("/peserta/:id/status", controllers.UpdatePesertaStatus)
+		funrunGroup.DELETE("/peserta/:id", controllers.DeletePesertaFunrun)
 
-		funrunGroup.POST("/peserta", controllers.CreatePesertaFunrun)           // Create peserta funrun
-		funrunGroup.GET("/peserta", controllers.GetAllPesertaFunrun)            // Get all peserta with pagination & filters
-		funrunGroup.GET("/peserta/:id", controllers.GetPesertaByID)             // Get peserta by ID
-		funrunGroup.PUT("/peserta/:id", controllers.UpdatePesertaFunrun)        // Update peserta
-		funrunGroup.PUT("/peserta/:id/status", controllers.UpdatePesertaStatus) // Update status only
-		funrunGroup.DELETE("/peserta/:id", controllers.DeletePesertaFunrun)     // Delete peserta (soft delete)
+		funrunGroup.GET("/stats", controllers.GetPesertaStats)
+		funrunGroup.GET("/kontingen/:kontingen", controllers.GetPesertaByKontingen)
+	}
+	knockoutGroup := router.Group("/knockout")
+	{
+		knockoutGroup.POST("/", controllers.CreateKnockoutMatch)
+		knockoutGroup.GET("/", controllers.GetAllKnockoutMatches)
+		knockoutGroup.GET("/:id", controllers.GetKnockoutMatchByID)
+		knockoutGroup.PUT("/:id", controllers.UpdateKnockoutMatch)
+		knockoutGroup.DELETE("/:id", controllers.DeleteKnockoutMatch)
 
-		funrunGroup.GET("/stats", controllers.GetPesertaStats)                      // Get peserta statistics
-		funrunGroup.GET("/kontingen/:kontingen", controllers.GetPesertaByKontingen) // Get peserta by kontingen
+		knockoutGroup.GET("/stats", controllers.GetKnockoutStats)
+		knockoutGroup.GET("/kategori/:kategori", controllers.GetKnockoutByKategori)
+		knockoutGroup.GET("/tahap/:tahap", controllers.GetKnockoutByTahap)
+		knockoutGroup.GET("/standing", controllers.GetKnockoutStanding)
 	}
 }

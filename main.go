@@ -34,7 +34,8 @@ func main() {
 		&models.DaftarUser{},
 		&models.Berita{},
 		&models.ParticipantRegistration{},
-		&models.Funrun{}, 
+		&models.Funrun{},
+		&models.KnockoutMatch{},
 	)
 
 	if _, err := os.Stat("uploads"); os.IsNotExist(err) {
