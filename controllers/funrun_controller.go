@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Request structs
 type CreatePesertaFunrunRequest struct {
 	Nama      string `json:"nama" binding:"required,max=100"`
 	Email     string `json:"email" binding:"required,email,max=100"`
