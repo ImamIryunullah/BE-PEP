@@ -18,6 +18,7 @@ type ParticipantRegistrationRequest struct {
 	NamaLengkap    string `json:"nama_lengkap" form:"nama_lengkap" binding:"required"`
 	Email          string `json:"email" form:"email" binding:"required,email"`
 	NoTelepon      string `json:"no_telepon" form:"no_telepon" binding:"required"`
+	JenisKelamin   string `json:"jenis_kelamin" form:"jenis_kelamin" binding:"required"`
 	JenisPeserta   string `json:"jenis_peserta" form:"jenis_peserta" binding:"required"`
 	CabangOlahraga string `json:"cabang_olahraga" form:"cabang_olahraga" binding:"required"`
 	WilayahKerja   string `json:"wilayah_kerja" form:"wilayah_kerja" binding:"required"`
@@ -44,6 +45,7 @@ func SubmitParticipantRegistration(c *gin.Context) {
 		NamaLengkap: input.NamaLengkap,
 
 		NoTelepon:      input.NoTelepon,
+		JenisKelamin:   input.JenisKelamin,
 		JenisPeserta:   input.JenisPeserta,
 		CabangOlahraga: input.CabangOlahraga,
 		WilayahKerja:   input.WilayahKerja,
@@ -128,6 +130,7 @@ func EditParticipantRegistration(c *gin.Context) {
 
 	existing.NamaLengkap = input.NamaLengkap
 	existing.NoTelepon = input.NoTelepon
+	existing.JenisKelamin = input.JenisKelamin
 	existing.JenisPeserta = input.JenisPeserta
 	existing.CabangOlahraga = input.CabangOlahraga
 	existing.WilayahKerja = input.WilayahKerja
@@ -276,14 +279,11 @@ func GetUserWithRegistrations(c *gin.Context) {
 	})
 }
 
-// Tambahkan ini ke file controllers/participant_controller.go
-
 type UpdateStatusRequest struct {
 	Status string `json:"status" binding:"required"`
 	Reason string `json:"reason,omitempty"`
 }
 
-// UpdateParticipantStatus - untuk verifikasi/tolak peserta
 func UpdateParticipantStatus(c *gin.Context) {
 	participantIDStr := c.Param("id")
 	participantID, err := strconv.ParseUint(participantIDStr, 10, 32)
@@ -298,7 +298,6 @@ func UpdateParticipantStatus(c *gin.Context) {
 		return
 	}
 
-	// Validasi status yang diizinkan
 	allowedStatus := []string{"pending", "approved", "rejected"}
 	isValidStatus := false
 	for _, status := range allowedStatus {
@@ -313,29 +312,24 @@ func UpdateParticipantStatus(c *gin.Context) {
 		return
 	}
 
-	// Cari peserta berdasarkan ID
 	var participant models.ParticipantRegistration
 	if err := config.DB.First(&participant, uint(participantID)).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Data peserta tidak ditemukan"})
 		return
 	}
 
-	// Update status
 	participant.Status = request.Status
 
-	// Jika ada alasan penolakan, simpan di catatan
 	if request.Status == "rejected" && request.Reason != "" {
 		participant.Catatan = request.Reason
 	}
 
-	// Simpan perubahan ke database
 	if err := config.DB.Save(&participant).Error; err != nil {
 		log.Printf("Database update error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengupdate status peserta", "details": err.Error()})
 		return
 	}
 
-	// Response sukses
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Status peserta berhasil diupdate",
 		"data": gin.H{
@@ -346,7 +340,6 @@ func UpdateParticipantStatus(c *gin.Context) {
 	})
 }
 
-// GetParticipantById - untuk mendapatkan detail peserta berdasarkan ID
 func GetParticipantById(c *gin.Context) {
 	participantIDStr := c.Param("id")
 	participantID, err := strconv.ParseUint(participantIDStr, 10, 32)

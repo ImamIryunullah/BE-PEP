@@ -12,6 +12,7 @@ type ParticipantRegistration struct {
 	NamaLengkap    string    `json:"nama_lengkap" form:"nama_lengkap" binding:"required"`
 	Email          string    `json:"email" form:"email" binding:"required,email"`
 	NoTelepon      string    `json:"no_telepon" form:"no_telepon" binding:"required"`
+	JenisKelamin   string    `json:"jenis_kelamin" form:"jenis_kelamin" binding:"required"`
 	JenisPeserta   string    `json:"jenis_peserta" form:"jenis_peserta" binding:"required"`
 	CabangOlahraga string    `json:"cabang_olahraga" form:"cabang_olahraga" binding:"required"`
 	WilayahKerja   string    `json:"wilayah_kerja" form:"wilayah_kerja" binding:"required"`
