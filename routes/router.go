@@ -27,7 +27,6 @@ func SetupRoutes(router *gin.Engine) {
 
 	funrunGroup := router.Group("/funrun")
 	{
-
 		funrunGroup.POST("/peserta", controllers.CreatePesertaFunrun)
 		funrunGroup.GET("/peserta", controllers.GetAllPesertaFunrun)
 		funrunGroup.GET("/peserta/:id", controllers.GetPesertaByID)
