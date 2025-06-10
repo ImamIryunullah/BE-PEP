@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -95,20 +96,24 @@ func GetAllKnockoutMatches(c *gin.Context) {
 	query := config.DB.Model(&models.KnockoutMatch{})
 
 	if kategori != "" {
-		query = query.Where("kategori ILIKE ?", "%"+kategori+"%")
+		query = query.Where("kategori LIKE ?", "%"+kategori+"%")
 	}
 	if subKategori != "" {
-		query = query.Where("sub_kategori ILIKE ?", "%"+subKategori+"%")
+		query = query.Where("sub_kategori LIKE ?", "%"+subKategori+"%")
 	}
 	if tahap != "" {
-		query = query.Where("tahap ILIKE ?", "%"+tahap+"%")
+		query = query.Where("tahap LIKE ?", "%"+tahap+"%")
 	}
 	if search != "" {
-		query = query.Where("tim1 ILIKE ? OR tim2 ILIKE ? OR hasil ILIKE ?",
-			"%"+search+"%", "%"+search+"%", "%"+search+"%")
+		query = query.Where(
+			config.DB.Where("tim1 LIKE ?", "%"+search+"%").
+				Or("tim2 LIKE ?", "%"+search+"%").
+				Or("hasil LIKE ?", "%"+search+"%"),
+		)
 	}
 
 	if err := query.Count(&total).Error; err != nil {
+		log.Println("COUNT ERROR:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
 			"message": "Gagal menghitung total data",
