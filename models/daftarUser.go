@@ -21,6 +21,8 @@ type DaftarUser struct {
 	IsActive  bool       `gorm:"default:true" json:"is_active"`
 	LastLogin *time.Time `json:"last_login,omitempty"`
 
+	Role string `gorm:"type:varchar(50);default:'user'" json:"role"`
+
 	Registrations []ParticipantRegistration `gorm:"foreignKey:UserID" json:"registrations,omitempty"`
 }
 

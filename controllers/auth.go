@@ -39,5 +39,19 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Login berhasil", "user": peserta.Email})
+	redirectTo := "/peserta/dashboard"
+	if peserta.Role == "admin" {
+		redirectTo = "/admin/dashboard"
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login berhasil",
+		"user": gin.H{
+			"email":    peserta.Email,
+			"aset":     peserta.Aset,
+			"provinsi": peserta.Provinsi,
+			"role":     peserta.Role,
+		},
+		"redirect_to": redirectTo,
+	})
 }

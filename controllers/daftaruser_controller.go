@@ -135,7 +135,6 @@ func validatePhoto(file *multipart.FileHeader) error {
 		return fmt.Errorf("format file tidak didukung. Gunakan: jpg, jpeg, png, gif, atau webp")
 	}
 
-	
 	allowedMimeTypes := map[string]bool{
 		"image/jpeg": true,
 		"image/jpg":  true,
@@ -144,24 +143,20 @@ func validatePhoto(file *multipart.FileHeader) error {
 		"image/webp": true,
 	}
 
-	
 	src, err := file.Open()
 	if err != nil {
 		return fmt.Errorf("gagal membaca file")
 	}
 	defer src.Close()
 
-	
 	buffer := make([]byte, 512)
 	_, err = src.Read(buffer)
 	if err != nil {
 		return fmt.Errorf("gagal membaca header file")
 	}
 
-	
 	src.Seek(0, 0)
 
-	
 	contentType := DetectContentType(buffer)
 	if !allowedMimeTypes[contentType] {
 		return fmt.Errorf("tipe file tidak valid")
@@ -170,9 +165,8 @@ func validatePhoto(file *multipart.FileHeader) error {
 	return nil
 }
 
-
 func DetectContentType(buffer []byte) string {
-	
+
 	if len(buffer) >= 3 && buffer[0] == 0xFF && buffer[1] == 0xD8 && buffer[2] == 0xFF {
 		return "image/jpeg"
 	}
@@ -188,7 +182,6 @@ func DetectContentType(buffer []byte) string {
 	return "application/octet-stream"
 }
 
-
 func ensureDirectoryExists(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		return os.MkdirAll(dir, 0755)
@@ -196,12 +189,10 @@ func ensureDirectoryExists(dir string) error {
 	return nil
 }
 
-
 func generateUniqueFilename(originalName string) string {
 	ext := filepath.Ext(originalName)
 	nameWithoutExt := strings.TrimSuffix(originalName, ext)
 
-	
 	nameWithoutExt = strings.ReplaceAll(nameWithoutExt, " ", "_")
 	nameWithoutExt = strings.ReplaceAll(nameWithoutExt, "..", "")
 

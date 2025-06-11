@@ -7,6 +7,7 @@ import (
 	"github.com/ImamIryunullah/BE-PEP/config"
 	"github.com/ImamIryunullah/BE-PEP/models"
 	"github.com/ImamIryunullah/BE-PEP/routes"
+	"github.com/ImamIryunullah/BE-PEP/seeder"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +38,7 @@ func main() {
 		&models.Funrun{},
 		&models.KnockoutMatch{},
 	)
-
+	seeder.SeedAdmin()
 	if _, err := os.Stat("uploads"); os.IsNotExist(err) {
 		os.Mkdir("uploads", 0755)
 	}
@@ -55,4 +56,5 @@ func main() {
 	routes.SetupRoutes(router)
 
 	router.Run("0.0.0.0:8080")
+
 }
