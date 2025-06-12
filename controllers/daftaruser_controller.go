@@ -182,6 +182,24 @@ func DetectContentType(buffer []byte) string {
 	return "application/octet-stream"
 }
 
+func GetAllAkun(c *gin.Context) {
+	var pesertaList []models.DaftarUser
+
+	if err := config.DB.Find(&pesertaList).Error; err != nil {
+		c.JSON(500, gin.H{
+			"success": false,
+			"message": "Gagal mengambil data peserta",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"message": "Data peserta berhasil diambil",
+		"data":    pesertaList,
+	})
+}
+
 func ensureDirectoryExists(dir string) error {
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		return os.MkdirAll(dir, 0755)

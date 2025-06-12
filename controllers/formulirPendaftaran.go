@@ -27,6 +27,12 @@ type ParticipantRegistrationRequest struct {
 }
 
 func SubmitParticipantRegistration(c *gin.Context) {
+	userIDs, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
+		return
+	}
+	id := userIDs.(uint)
 	var input ParticipantRegistrationRequest
 	if err := c.ShouldBind(&input); err != nil {
 		log.Printf("Binding error: %v", err)
@@ -34,16 +40,16 @@ func SubmitParticipantRegistration(c *gin.Context) {
 		return
 	}
 
-	var user models.DaftarUser
-	if err := config.DB.Where("email = ?", strings.ToLower(input.Email)).First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email tidak terdaftar. Silakan daftar akun terlebih dahulu"})
-		return
-	}
+	// var user models.DaftarUser
+	// if err := config.DB.Where("email = ?", strings.ToLower(input.Email)).First(&user).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Email tidak terdaftar. Silakan daftar akun terlebih dahulu"})
+	// 	return
+	// }
 
 	registration := models.ParticipantRegistration{
-		UserID:      user.ID,
-		NamaLengkap: input.NamaLengkap,
-
+		UserID:         id,
+		NamaLengkap:    input.NamaLengkap,
+		Email:          input.Email,
 		NoTelepon:      input.NoTelepon,
 		JenisKelamin:   input.JenisKelamin,
 		JenisPeserta:   input.JenisPeserta,
@@ -229,7 +235,23 @@ func GetAllPeserta(c *gin.Context) {
 		"total":   len(peserta),
 	})
 }
+func GetAllPesertaList(c *gin.Context) {
+	var peserta []models.ParticipantRegistration
 
+	if err := config.DB.Preload("User").Order("created_at desc").Find(&peserta).Error; err != nil {
+		log.Printf("Database query error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Gagal mengambil data peserta",
+			"details": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Data peserta berhasil diambil",
+		"data":    peserta,
+		"total":   len(peserta),
+	})
+}
 func GetRegistrationsByUserID(c *gin.Context) {
 	userIDStr := c.Param("user_id")
 	userID, err := strconv.ParseUint(userIDStr, 10, 32)
@@ -340,22 +362,38 @@ func UpdateParticipantStatus(c *gin.Context) {
 	})
 }
 
-func GetParticipantById(c *gin.Context) {
-	participantIDStr := c.Param("id")
-	participantID, err := strconv.ParseUint(participantIDStr, 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "ID peserta tidak valid"})
+func GetParticipantsByUserID(c *gin.Context) {
+	// Ambil userID dari context (misal diset oleh middleware JWT)
+	userIDRaw, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User tidak terautentikasi"})
 		return
 	}
 
-	var participant models.ParticipantRegistration
-	if err := config.DB.Preload("User").First(&participant, uint(participantID)).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Data peserta tidak ditemukan"})
+	userID, ok := userIDRaw.(uint)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Format user ID tidak valid"})
+		return
+	}
+
+	var participants []models.ParticipantRegistration
+	err := config.DB.Preload("User").
+		Where("user_id = ?", userID).
+		Find(&participants).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengambil data peserta"})
+		return
+	}
+
+	// Jika tidak ada data
+	if len(participants) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Data peserta tidak ditemukan untuk user ini"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Data peserta berhasil diambil",
-		"data":    participant,
+		"message": "Data peserta berdasarkan user berhasil diambil",
+		"data":    participants,
 	})
 }

@@ -74,7 +74,7 @@ func UpdateBerita(c *gin.Context) {
 		ext := filepath.Ext(header.Filename)
 		filename := fmt.Sprintf("%d_%s%s", time.Now().Unix(), strings.ReplaceAll(header.Filename, ext, ""), ext)
 
-		uploadPath := filepath.Join("uploads", filename)
+		uploadPath := filepath.Join("berita", filename)
 		if err := c.SaveUploadedFile(header, uploadPath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan file"})
 			return
@@ -83,7 +83,7 @@ func UpdateBerita(c *gin.Context) {
 		foto = filename
 
 		if berita.Foto != "" && berita.Foto != filename {
-			oldPath := filepath.Join("uploads", berita.Foto)
+			oldPath := filepath.Join("berita", berita.Foto)
 			os.Remove(oldPath)
 		}
 	}
@@ -158,7 +158,7 @@ func CreateBerita(c *gin.Context) {
 		ext := filepath.Ext(header.Filename)
 		filename := fmt.Sprintf("%d_%s%s", time.Now().Unix(), strings.ReplaceAll(header.Filename, ext, ""), ext)
 
-		uploadPath := filepath.Join("uploads", filename)
+		uploadPath := filepath.Join("berita", filename)
 		if err := c.SaveUploadedFile(header, uploadPath); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan file"})
 			return
@@ -219,7 +219,7 @@ func DeleteBerita(c *gin.Context) {
 	}
 
 	if berita.Foto != "" {
-		photoPath := filepath.Join("uploads", berita.Foto)
+		photoPath := filepath.Join("berita", berita.Foto)
 		os.Remove(photoPath)
 	}
 

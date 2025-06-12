@@ -1,60 +1,46 @@
 package main
 
 import (
-	"os"
-	"time"
+	"log"
 
 	"github.com/ImamIryunullah/BE-PEP/config"
-	"github.com/ImamIryunullah/BE-PEP/models"
 	"github.com/ImamIryunullah/BE-PEP/routes"
-	"github.com/ImamIryunullah/BE-PEP/seeder"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+func CheckDatabaseMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if config.DB == nil {
+			c.JSON(500, gin.H{"error": "Database is not connected"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+func setupRouter() *gin.Engine {
 	router := gin.Default()
-
-	corsConfig := cors.Config{
-		AllowAllOrigins:  true,
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://192.168.1.53:8080"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "csrf-token", "CSRF-TOKEN", "X-Requested-With"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}
+	}))
 
-	router.Use(cors.New(corsConfig))
-
-	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-
-	config.ConnectDatabase()
-
-	config.DB.AutoMigrate(
-		&models.DaftarUser{},
-		&models.Berita{},
-		&models.ParticipantRegistration{},
-		&models.Funrun{},
-		&models.KnockoutMatch{},
-	)
-	seeder.SeedAdmin()
-	if _, err := os.Stat("uploads"); os.IsNotExist(err) {
-		os.Mkdir("uploads", 0755)
-	}
-
-	router.Static("/uploads", "./uploads")
-
-	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "ok",
-			"message": "Server is running",
-			"time":    time.Now(),
-		})
-	})
-
 	routes.SetupRoutes(router)
-
-	router.Run("0.0.0.0:8080")
+	return router
+}
+func main() {
+	gin.SetMode(gin.ReleaseMode)
+	config.ConnectDatabase()
+	r := setupRouter()
+	r.Use(CheckDatabaseMiddleware())
+	if err := r.Run("192.168.1.53:3000"); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
 
 }

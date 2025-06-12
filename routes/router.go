@@ -2,16 +2,27 @@ package routes
 
 import (
 	"github.com/ImamIryunullah/BE-PEP/controllers"
+	"github.com/ImamIryunullah/BE-PEP/handlers"
+	"github.com/ImamIryunullah/BE-PEP/middleware"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(router *gin.Engine) {
-	router.POST("/register", controllers.RegisterPeserta)
-	router.POST("/login", controllers.Login)
-
-	router.GET("/registrations/user/:user_id", controllers.GetRegistrationsByUserID)
-	router.GET("/users/:user_id/registrations", controllers.GetUserWithRegistrations)
-	beritaGroup := router.Group("/berita")
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+	statis := router.Group("/")
+	berita := router.Group("/")
+	protected := router.Group("/api")
+	protected.Use(middleware.VerifyJWT())
+	router.POST("/api/register", controllers.RegisterPeserta)
+	router.GET("/api/register", controllers.GetAllAkun)
+	router.POST("/api/login", handlers.Login)
+	router.POST("/api/logout", handlers.Logout)
+	protected.GET("/datauser", handlers.GetUserDataAuth)
+	router.GET("/api/registrations/user/:user_id", controllers.GetRegistrationsByUserID)
+	router.GET("/api/users/:user_id/registrations", controllers.GetUserWithRegistrations)
+	beritaGroup := router.Group("/api/berita")
 	{
 		beritaGroup.POST("/", controllers.CreateBerita)
 		beritaGroup.GET("/", controllers.GetAllBerita)
@@ -19,13 +30,15 @@ func SetupRoutes(router *gin.Engine) {
 		beritaGroup.PUT("/:id", controllers.UpdateBerita)
 		beritaGroup.DELETE("/:id", controllers.DeleteBerita)
 	}
-	router.POST("/daftar", controllers.SubmitParticipantRegistration)
-	router.GET("/daftar", controllers.GetAllPeserta)
-	router.PUT("/daftar/:id", controllers.EditParticipantRegistration)
-	router.PUT("/daftar/:id/status", controllers.UpdateParticipantStatus)
-	router.GET("/daftar/:id", controllers.GetParticipantById)
+	protected.POST("/daftar", controllers.SubmitParticipantRegistration)
+	protected.GET("/daftar-peserta", controllers.GetAllPeserta)        //admin
+	router.GET("api/daftar-list", controllers.GetAllPesertaList)       //admin
+	protected.GET("/daftar-akun", controllers.GetParticipantsByUserID) //user
+	protected.PUT("/daftar/:id", controllers.EditParticipantRegistration)
+	protected.PUT("/daftar/:id/status", controllers.UpdateParticipantStatus)
+	// protected.GET("/daftar/:id", controllers.GetParticipantById)
 
-	funrunGroup := router.Group("/funrun")
+	funrunGroup := router.Group("/api/funrun")
 	{
 		funrunGroup.POST("/peserta", controllers.CreatePesertaFunrun)
 		funrunGroup.GET("/peserta", controllers.GetAllPesertaFunrun)
@@ -37,7 +50,7 @@ func SetupRoutes(router *gin.Engine) {
 		funrunGroup.GET("/stats", controllers.GetPesertaStats)
 		funrunGroup.GET("/kontingen/:kontingen", controllers.GetPesertaByKontingen)
 	}
-	knockoutGroup := router.Group("/knockout")
+	knockoutGroup := router.Group("/api/knockout")
 	{
 		knockoutGroup.POST("/", controllers.CreateKnockoutMatch)
 		knockoutGroup.GET("/", controllers.GetAllKnockoutMatches)
@@ -50,4 +63,13 @@ func SetupRoutes(router *gin.Engine) {
 		knockoutGroup.GET("/tahap/:tahap", controllers.GetKnockoutByTahap)
 		knockoutGroup.GET("/standing", controllers.GetKnockoutStanding)
 	}
+	assets := router.Group("/")
+	assets.Use(middleware.CacheControlMiddleware())
+	assets.Use(gzip.Gzip(gzip.BestSpeed))
+	assets.Static("/assets", "./assets")
+
+	statis.Use(middleware.VerifyJWT())
+	statis.Static("/uploads", "./uploads")
+
+	berita.Static("/berita", "./berita")
 }

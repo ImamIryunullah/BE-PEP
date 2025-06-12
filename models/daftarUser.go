@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -37,4 +38,17 @@ func (u *DaftarUser) GetPublicData() map[string]interface{} {
 		"created_at": u.CreatedAt,
 		"updated_at": u.UpdatedAt,
 	}
+}
+func (user *DaftarUser) HashPassword() error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
+	return nil
+}
+
+func (user *DaftarUser) ComparePassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	return err == nil
 }
